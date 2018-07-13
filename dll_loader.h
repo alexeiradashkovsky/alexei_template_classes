@@ -83,6 +83,10 @@ private:
     std::string m_create;
     std::string m_dll_ending;
     std::map<std::string, void*> m_dll_libs;
+
+    // uncopyable
+    dll_loader_template(const dll_loader_template&);
+    dll_loader_template operator=(const dll_loader_template&);
 };
 
 template<class T>
