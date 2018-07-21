@@ -27,12 +27,11 @@ SOFTWARE.
 
 /**
  *  @file config_file_reader.h
- *  @brief load abstract objects from dll files every abstract class have to use the next create function
- *
+ *  @brief read config file and parse every line by decery type of data
  *  @details support only from c++11
  *
  *  @author Author Alexei Radashkovsky (alexeirada@gmail.com)
- *  @Update by Alexei Radashkovsky on 04/27/18
+ *  @Update by Alexei Radashkovsky on 07/21/18
  *  @bug no bugs known.
  */
 
@@ -46,38 +45,12 @@ SOFTWARE.
 
 namespace alexei_prog_snob {
 
-template<class StringContainer = std::queue<std::string> >
-class init_file_parser_template {
-public:
-	explicit init_file_parser_template(const std::string& _delimiters)
-	:m_data_delimiters(_delimiters) {
-	}
-	~init_file_parser_template(){}
-	
-	void parse_line(std::string _line, StringContainer& _cnt) {
-		size_t pos = 0;
-		while(true) {
-			pos = _line.find(m_data_delimiters);
-			std::fill_n(std::back_inserter(_cnt), 1, _line.substr(0,pos));
-			if(pos == std::string::npos) {
-				break;
-			}
-			_line.erase(0, pos + m_data_delimiters.length());
-		}
-	}
-
-private:
-	std::string m_data_delimiters;
-};
-
-
-template<
-class DataType = std::string,
-class Task = std::function<void(std::shared_ptr<DataType>, const std::string& _str)>,
-class Dictionary = std::map<std::string, Task>
->// end template
+template<class DataType = std::string>
 class string_cnt_struct {
 public:
+	typedef std::function<void(std::shared_ptr<DataType>, const std::string& _str)> Task;
+	typedef std::map<std::string, Task> Dictionary;
+	
 	string_cnt_struct(Dictionary& _dictionary)
 	:m_defaul_names(_dictionary),
 	 new_data(nullptr),
@@ -114,13 +87,12 @@ private:
 };
 
 
-template<
-class DataType = std::string,
-class Task = std::function<void(std::shared_ptr<DataType>, const std::string& _str)>,
-class Dictionary = std::map<std::string, Task>
->// end template
+template<class DataType>
 class data_cnt_struct {
 public:
+	typedef std::function<void(std::shared_ptr<DataType>, const std::string& _str)> Task;
+	typedef std::map<std::string, Task> Dictionary;
+	
 	data_cnt_struct(Dictionary& _dictionary)
 	:m_defaul_names(_dictionary),
 	 new_data(nullptr),
@@ -159,23 +131,27 @@ private:
 	Task m_next_task;
 };
 
+
+template<class StringContainer = std::queue<std::string> >
+class init_file_parser_template {
+public:
+	explicit init_file_parser_template(const std::string& _delimiters);
+	~init_file_parser_template();
+	void parse_line(std::string _line, StringContainer& _cnt);
+private:
+	std::string m_data_delimiters;
+};
+
 template<
-class DataType 			= std::string, 
-class StringContainer 	= std::vector<std::string>,
-class Task 				= std::function<void(std::shared_ptr<DataType>, const std::string& _str)>,
-class Dictionary 		= std::map<std::string, Task>,//end map 
-class Creator 			= string_cnt_struct<DataType, Task, Dictionary>
+class DataType 	= std::string, 
+class Creator 	= string_cnt_struct<DataType>
 >
 class config_file_reader_template {
 public:
-	config_file_reader_template(const std::string& _delimiters, Dictionary& _dictionary)
-	:m_parser(_delimiters),
-	 m_creator(_dictionary) {
-	}
-
-	~config_file_reader_template() {
-	}
-
+	typedef std::vector<std::string> StringContainer;
+	
+	config_file_reader_template(const std::string& _delimiters, Creator& _creator);
+	~config_file_reader_template();
 	bool read_init_file(const std::string& _file_name);
 	void construct_all_data();
 	bool get_new_data(std::shared_ptr<DataType>& _new_data);
@@ -183,11 +159,23 @@ private:
 	std::queue<std::shared_ptr<DataType> > m_data_cnt;
 	StringContainer m_str_cnt;
 	init_file_parser_template<StringContainer> m_parser;
-	Creator m_creator;
+	Creator& m_creator;
 };
 
-template<class DataType, class StringContainer, class Task, class Dictionary, class Creator>
-bool config_file_reader_template<DataType, StringContainer, Task, Dictionary, Creator>::
+template<class DataType, class Creator>
+config_file_reader_template<DataType, Creator>::
+config_file_reader_template(const std::string& _delimiters, Creator& _creator)
+:m_parser(_delimiters),
+ m_creator(_creator) {
+}
+
+template<class DataType, class Creator>
+config_file_reader_template<DataType, Creator>::
+~config_file_reader_template() {
+}
+
+template<class DataType, class Creator>
+bool config_file_reader_template<DataType, Creator>::
 read_init_file(const std::string& _file_name) {
 	std::ifstream init_file(_file_name);
 	if(init_file.is_open() == false) {
@@ -202,8 +190,8 @@ read_init_file(const std::string& _file_name) {
 	return true;
 }
 
-template<class DataType, class StringContainer, class Task, class Dictionary, class Creator>
-void config_file_reader_template<DataType, StringContainer, Task, Dictionary, Creator>::
+template<class DataType, class Creator>
+void config_file_reader_template<DataType, Creator>::
 construct_all_data() {
 	auto close_dll = [this](const std::string& _str) { 
 			std::shared_ptr<DataType> new_data(m_creator(_str));
@@ -220,8 +208,8 @@ construct_all_data() {
 	}
 }
 
-template<class DataType, class StringContainer, class Task, class Dictionary, class Creator>
-bool config_file_reader_template<DataType, StringContainer, Task, Dictionary, Creator>::
+template<class DataType, class Creator>
+bool config_file_reader_template<DataType, Creator>::
 get_new_data(std::shared_ptr<DataType>& _new_data) {
 	if(m_data_cnt.empty() == true) {
 		return true;
@@ -231,6 +219,28 @@ get_new_data(std::shared_ptr<DataType>& _new_data) {
 	m_data_cnt.pop();
 	return false;	
 }
+
+template<class StringContainer>
+init_file_parser_template<StringContainer>::init_file_parser_template(const std::string& _delimiters)
+:m_data_delimiters(_delimiters) {
+}
+
+template<class StringContainer>
+init_file_parser_template<StringContainer>::~init_file_parser_template(){}
+
+template<class StringContainer>
+void init_file_parser_template<StringContainer>::parse_line(std::string _line, StringContainer& _cnt) {
+	size_t pos = 0;
+	while(true) {
+		pos = _line.find(m_data_delimiters);
+		std::fill_n(std::back_inserter(_cnt), 1, _line.substr(0,pos));
+		if(pos == std::string::npos) {
+			break;
+		}
+		_line.erase(0, pos + m_data_delimiters.length());
+	}
+}
+
 
 } // end namespace alexei_prog snob
 
