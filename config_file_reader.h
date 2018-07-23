@@ -48,6 +48,7 @@ namespace alexei_prog_snob {
 template<class DataType = std::string>
 class string_cnt_struct {
 public:
+	
 	typedef std::function<void(std::shared_ptr<DataType>, const std::string& _str)> Task;
 	typedef std::map<std::string, Task> Dictionary;
 	
