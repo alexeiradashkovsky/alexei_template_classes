@@ -33,6 +33,7 @@ SOFTWARE.
 #include "safe_queue.h"
 namespace alexei_prog_snob {
 
+template<typename Task = std::function<void()> >
 class thread_pool {
 public:
     enum thread_pool_priority_enum {
@@ -42,7 +43,6 @@ public:
         LAST_PRIORITY
     };
 
-    typedef std::function<void()> Task;
     typedef std::pair<Task,thread_pool_priority_enum> Task_Priority_Pair;
     
     explicit thread_pool(size_t _num_of_threads_in_the_system);
@@ -75,7 +75,8 @@ private:
     thread_pool& operatoe=(const thread_pool&);
 };
 
-thread_pool::thread_pool(size_t _num_of_threads_in_the_system)
+template<typename Task>
+thread_pool<Task>::thread_pool(size_t _num_of_threads_in_the_system)
 :m_terminate(false)
  {
     auto get_tasks_in_threads = [this](){
@@ -94,28 +95,33 @@ thread_pool::thread_pool(size_t _num_of_threads_in_the_system)
     }
 }
 
-thread_pool::~thread_pool() {
+template<typename Task>
+thread_pool<Task>::~thread_pool() {
     if(m_terminate == false) {
         shutdown();
     }
 }
 
-void thread_pool::submit_task(thread_pool_priority_enum _priority, Task _task) {
+template<typename Task>
+void thread_pool<Task>::submit_task(thread_pool_priority_enum _priority, Task _task) {
     Task_Priority_Pair newPair(_task, _priority);
     submit_task(std::move(newPair));
 }
 
-void thread_pool::submit_task(const Task_Priority_Pair& _priority_task) {
+template<typename Task>
+void thread_pool<Task>::submit_task(const Task_Priority_Pair& _priority_task) {
     m_task_container.push(std::move(_priority_task));
 }
 
-void thread_pool::shutdown() {
+template<typename Task>
+void thread_pool<Task>::shutdown() {
     m_terminate = true;
     auto join_all_threads = [](std::thread& _nextThread) { _nextThread.join(); };
     std::for_each(m_thread_container.begin(), m_thread_container.end(), join_all_threads);
 }
 
-void thread_pool::shutdown(size_t _timeout_ms) {
+template<typename Task>
+void thread_pool<Task>::shutdown(size_t _timeout_ms) {
     std::this_thread::sleep_for(std::chrono::milliseconds(_timeout_ms));
     shutdown();
 }
