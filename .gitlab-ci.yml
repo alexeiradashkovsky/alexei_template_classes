@@ -13,9 +13,6 @@ build:
   script: 
     - cd uni_tests
     - make
-
-# run tests using the binary built before
-test:
   stage: test
   script:
     - ./uni_test
