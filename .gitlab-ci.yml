@@ -13,4 +13,3 @@ build:
   script: 
     - cd uni_tests
     - make
-    - ./uni_test
