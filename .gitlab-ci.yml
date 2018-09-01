@@ -11,7 +11,7 @@ build:
   # before_script: 
   #   - apt update && apt -y install make autoconf 
   script: 
-    - cd uni_test
+    - cd uni_tests
     - make
 
 # run tests using the binary built before
