@@ -13,6 +13,4 @@ build:
   script: 
     - cd uni_tests
     - make
-  stage: test
-  script:
     - ./uni_test
