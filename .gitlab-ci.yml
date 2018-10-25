@@ -12,4 +12,3 @@ build:
   #   - apt update && apt -y install make autoconf 
   script: 
     - cd uni_tests
-    - make
