@@ -3,14 +3,17 @@ TEST_INC := ./inc
 TEST_SRC := ./src
 OBJ_PATH := ./obj
 TMPLT := ../templates
+PYTHON_3_6_INC_PATH := /usr/include/python3.6m
 
-ALL_INC := -I$(TEST_INC) -I$(TMPLT)
+ALL_INC := -I$(TEST_INC) -I$(TMPLT) -I$(PYTHON_3_6_INC_PATH)
 
 CFLAGS := -ansi -pedantic -Werror -Wall -std=c++11 $(ALL_INC)
 
-DYN_LIB := -ldl -lpthread
+DYN_LIB := -ldl -lpthread -lpython3.6m -lutil -lm -Xlinker -export-dynamic
 
-OBJ := $(OBJ_PATH)/thread_pool_test.o $(OBJ_PATH)/uni_test.o
+OBJ := 	$(OBJ_PATH)/thread_pool_test.o 	\
+		$(OBJ_PATH)/python_test.o		\
+	   	$(OBJ_PATH)/uni_test.o			\
 
 
 APP_NAME := uni_test

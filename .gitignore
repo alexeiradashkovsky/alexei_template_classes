@@ -1,4 +1,5 @@
 *.c
 .vscode
+__pycache__
 *.out
 *.o
