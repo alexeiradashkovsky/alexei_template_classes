@@ -7,3 +7,5 @@ File List
 * safe_queue.h
 * thread_pool.h
 * import_from_python.h
+* factory.h
+* singleton.h
