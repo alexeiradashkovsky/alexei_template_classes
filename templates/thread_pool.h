@@ -43,6 +43,7 @@ SOFTWARE.
 #include <functional>   // std::function
 #include <algorithm>    // std::for_each
 #include "safe_queue.h" // alexei_prog_snob::safe_priority_queue
+
 namespace alexei_prog_snob {
 
 template<typename Task = std::function<void()> >
@@ -107,8 +108,8 @@ private:
     std::vector<std::thread> m_thread_container;
 
     // uncopyable
-    thread_pool(const thread_pool&);
-    thread_pool& operator=(const thread_pool&);
+    thread_pool(const thread_pool&) = delete;
+    thread_pool& operator=(const thread_pool&) = delete;
 };
 
 template<typename Task>
@@ -152,11 +153,16 @@ void thread_pool<Task>::submit_task(const Task_Priority_Pair& _priority_task) {
 template<typename Task>
 void thread_pool<Task>::shutdown() {
     m_terminate = true;
-    auto join_all_threads = [this](std::thread& _nextThread) {
+    auto join_all_threads = [this](std::thread& _nextThread)->void{_nextThread.join();};
+    auto kill_all_threads = [this]()->void{
         auto empty_task = [](){return;};
         submit_task(HIGH, empty_task);
-        _nextThread.join(); 
     };
+    
+    for (size_t i = 0 ; i < m_thread_container.size(); ++i) {
+        kill_all_threads();
+    }
+
     std::for_each(m_thread_container.begin(), m_thread_container.end(), join_all_threads);
 }
 
