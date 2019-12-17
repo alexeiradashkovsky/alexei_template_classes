@@ -2,10 +2,9 @@ CC := g++
 TEST_INC := ./inc
 TEST_SRC := ./src
 OBJ_PATH := ./obj
-TMPLT := ../templates
 PYTHON_3_6_INC_PATH := /usr/include/python3.6m
 
-ALL_INC := -I$(TEST_INC) -I$(TMPLT) -I$(PYTHON_3_6_INC_PATH)
+ALL_INC := -I$(TEST_INC) -I$(PYTHON_3_6_INC_PATH)
 
 CFLAGS := -ansi -pedantic -Werror -Wall -std=c++11 $(ALL_INC)
 

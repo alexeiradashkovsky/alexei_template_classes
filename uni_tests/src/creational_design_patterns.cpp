@@ -1,6 +1,6 @@
 #include "creational_design_patterns.h"
-#include "factory.h"
-#include "singleton.h"
+#include "aps/templates/factory.h"
+#include "aps/templates/singleton.h"
 
 class Animal_t {
 public:
