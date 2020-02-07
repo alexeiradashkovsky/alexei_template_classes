@@ -39,10 +39,10 @@ Animal_t* newDOG() {
 }
 
 cdp_test_result abstract_factory_create_object() {
-    alexei_prog_snob::abstract_factory<Animal_t> animals;
+    alexei_prog_snob::AbstractFactory<Animal_t> animals;
     REG(animals, Dog_t, Animal_t);
 
-    std::shared_ptr<Animal_t> newOne = animals.make_object("Dog_t");
+    std::shared_ptr<Animal_t> newOne = animals.MakeObject("Dog_t");
     if (newOne == nullptr) {
         return CDP_TEST_FAIL;
     }
@@ -51,11 +51,11 @@ cdp_test_result abstract_factory_create_object() {
 }
 
 cdp_test_result abstract_factory_check_constructed_correct_obj() {
-    alexei_prog_snob::abstract_factory<Animal_t> animals;
+    alexei_prog_snob::AbstractFactory<Animal_t> animals;
     REG(animals, Dog_t, Animal_t);
     REG(animals, Animal_t, Animal_t);
 
-    std::shared_ptr<Animal_t> newOne = animals.make_object("Dog_t");
+    std::shared_ptr<Animal_t> newOne = animals.MakeObject("Dog_t");
     if (newOne == nullptr) {
         return CDP_TEST_FAIL;
     }
@@ -64,7 +64,7 @@ cdp_test_result abstract_factory_check_constructed_correct_obj() {
         return CDP_TEST_FAIL;
     }
 
-    std::shared_ptr<Animal_t> newTwo = animals.make_object("Animal_t");
+    std::shared_ptr<Animal_t> newTwo = animals.MakeObject("Animal_t");
     if (newTwo == nullptr) {
         return CDP_TEST_FAIL;
     }
@@ -80,7 +80,7 @@ cdp_test_result abstract_factory_check_constructed_correct_obj() {
 class Counter {
 public:
     template<class T>
-    friend class alexei_prog_snob::singleton;
+    friend class alexei_prog_snob::Singleton;
 
     Counter& operator= (const Counter&) = delete;
     Counter(const Counter&) = delete;
@@ -93,8 +93,8 @@ private:
 };
 
 cdp_test_result singleton_check_that_only_one_instance_of_the_class() {
-    Counter* c1 = alexei_prog_snob::singleton<Counter>::get_instance();
-    Counter* c2 = alexei_prog_snob::singleton<Counter>::get_instance();
+    Counter* c1 = alexei_prog_snob::Singleton<Counter>::s_GetInstance();
+    Counter* c2 = alexei_prog_snob::Singleton<Counter>::s_GetInstance();
     if (c1 != c2) {
         return CDP_TEST_FAIL;
     }

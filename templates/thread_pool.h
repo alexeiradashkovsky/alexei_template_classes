@@ -42,12 +42,12 @@ SOFTWARE.
 #include <tuple>        // std::pair
 #include <functional>   // std::function
 #include <algorithm>    // std::for_each
-#include "safe_queue.h" // alexei_prog_snob::safe_priority_queue
+#include "safe_queue.h" // alexei_prog_snob::SafePriorityQueue
 
 namespace alexei_prog_snob {
 
 template<typename Task = std::function<void()> >
-class thread_pool {
+class ThreadPool {
 public:
     enum thread_pool_priority_enum {
         LOW = 0,
@@ -58,118 +58,119 @@ public:
 
     typedef std::pair<Task,thread_pool_priority_enum> Task_Priority_Pair;
     
-    thread_pool();
-    ~thread_pool();
+    ThreadPool();
+    ~ThreadPool();
+
+    // uncopyable
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool(const ThreadPool&&) = delete;
+    ThreadPool& operator=(const ThreadPool&) = delete;
 
     /**
      * @brief initialize all threads
      * @param[in] _num_of_threads_in_the_system : number of threads to initialize.
      */
-    void init_thread_pool(size_t _num_of_threads_in_the_system);
+    void InitThreadPool(size_t _num_of_threads_in_the_system);
 
     /**
      * @brief add task to operate
      * @param[in] _priority : task priority.
      * @param[in] _task     : task to preforme.
      */
-    void submit_task(thread_pool_priority_enum _priority, Task _task);
+    void SubmitTask(thread_pool_priority_enum _priority, Task _task);
 
     /**
      * @brief add task to operate
      * @param[in] _priority_task : pair of task and priority.
      */
-    void submit_task(const Task_Priority_Pair& _priority_task);
+    void SubmitTask(const Task_Priority_Pair& _priority_task);
 
     /**
      * @brief terminate all thread
      */
-    void shutdown();
+    void Shutdown();
 
     /**
      * @brief terminate all thread
      * @param[in] _timeout_ms : time to wait before shutdown.
      */
-    void shutdown(size_t _timeout_ms);
+    void Shutdown(size_t _timeout_ms);
 private:
     bool m_terminate;
 
-    struct compair_priority {
+    struct CompairPriority {
         bool operator()(const Task_Priority_Pair& _lhs, const Task_Priority_Pair& _rhs) {
             return _lhs.second < _rhs.second;
         }
     };
 
-    alexei_prog_snob::safe_priority_queue<
+    alexei_prog_snob::SafePriorityQueue<
     Task_Priority_Pair,
     std::vector<Task_Priority_Pair >,
-    compair_priority
+    CompairPriority
     > m_task_container;
 
-    std::vector<std::thread> m_thread_container;
-
-    // uncopyable
-    thread_pool(const thread_pool&) = delete;
-    thread_pool& operator=(const thread_pool&) = delete;
+    std::vector<std::thread> m_threadContainer;
 };
 
 template<typename Task>
-thread_pool<Task>::thread_pool()
+ThreadPool<Task>::ThreadPool()
 :m_terminate(true) {
 }
 
 template<typename Task>
-thread_pool<Task>::~thread_pool() {
+ThreadPool<Task>::~ThreadPool() {
     if(m_terminate == false) {
-        shutdown();
+        Shutdown();
     }
 }
 
 template<typename Task>
-void thread_pool<Task>::init_thread_pool(size_t _num_of_threads_in_the_system) {
+void ThreadPool<Task>::InitThreadPool(size_t _num_of_threads_in_the_system) {
     m_terminate = false;
     auto get_tasks_in_threads = [this](){
         while (m_terminate != true) {
-            Task_Priority_Pair newTask = std::move(m_task_container.pop());
+            Task_Priority_Pair newTask = std::move(m_task_container.Pop());
             newTask.first();
         }
     };
 
     for (size_t i = 0; i < _num_of_threads_in_the_system ; ++i) {
-        m_thread_container.emplace_back(get_tasks_in_threads);
+        m_threadContainer.emplace_back(get_tasks_in_threads);
     }
 }
 
 template<typename Task>
-void thread_pool<Task>::submit_task(thread_pool_priority_enum _priority, Task _task) {
+void ThreadPool<Task>::SubmitTask(thread_pool_priority_enum _priority, Task _task) {
     Task_Priority_Pair newPair(_task, _priority);
-    submit_task(std::move(newPair));
+    SubmitTask(std::move(newPair));
 }
 
 template<typename Task>
-void thread_pool<Task>::submit_task(const Task_Priority_Pair& _priority_task) {
-    m_task_container.push(_priority_task);
+void ThreadPool<Task>::SubmitTask(const Task_Priority_Pair& _priority_task) {
+    m_task_container.Push(_priority_task);
 }
 
 template<typename Task>
-void thread_pool<Task>::shutdown() {
+void ThreadPool<Task>::Shutdown() {
     m_terminate = true;
     auto join_all_threads = [this](std::thread& _nextThread)->void{_nextThread.join();};
     auto kill_all_threads = [this]()->void{
         auto empty_task = [](){return;};
-        submit_task(HIGH, empty_task);
+        SubmitTask(HIGH, empty_task);
     };
     
-    for (size_t i = 0 ; i < m_thread_container.size(); ++i) {
+    for (size_t i = 0 ; i < m_threadContainer.size(); ++i) {
         kill_all_threads();
     }
 
-    std::for_each(m_thread_container.begin(), m_thread_container.end(), join_all_threads);
+    std::for_each(m_threadContainer.begin(), m_threadContainer.end(), join_all_threads);
 }
 
 template<typename Task>
-void thread_pool<Task>::shutdown(size_t _timeout_ms) {
+void ThreadPool<Task>::Shutdown(size_t _timeout_ms) {
     std::this_thread::sleep_for(std::chrono::milliseconds(_timeout_ms));
-    shutdown();
+    Shutdown();
 }
 
 

@@ -43,19 +43,19 @@ SOFTWARE.
 
 namespace alexei_prog_snob {
 template<typename T>
-class abstract_factory {
+class AbstractFactory {
 public:
     using MakeMethod = std::function<std::shared_ptr<T>(void)>;
 
-    abstract_factory& operator=(const abstract_factory&) = delete;
-    abstract_factory(const abstract_factory&&) = delete;
-    abstract_factory(const abstract_factory&) = delete;
+    AbstractFactory& operator=(const AbstractFactory&) = delete;
+    AbstractFactory(const AbstractFactory&&) = delete;
+    AbstractFactory(const AbstractFactory&) = delete;
 
-    abstract_factory(){}
-    ~abstract_factory(){}
+    AbstractFactory(){}
+    ~AbstractFactory(){}
 
-    void register_to_factory(const std::string& _class_name, MakeMethod _method);
-    std::shared_ptr<T> make_object(const std::string& _class_name) const;
+    void RegisterToFactory(const std::string& _class_name, MakeMethod _method);
+    std::shared_ptr<T> MakeObject(const std::string& _class_name) const;
 private:
     std::map<std::string, MakeMethod> m_ctors;
 };
@@ -67,13 +67,13 @@ std::shared_ptr<abstract_class> Maker() {
 }
 
 template<typename T>
-void abstract_factory<T>::register_to_factory(const std::string& _class_name, MakeMethod _method) {
+void AbstractFactory<T>::RegisterToFactory(const std::string& _class_name, MakeMethod _method) {
     m_ctors[_class_name] = _method;
 }
 
 
 template<typename T>
-std::shared_ptr<T> abstract_factory<T>::make_object(const std::string& _class_name) const {
+std::shared_ptr<T> AbstractFactory<T>::MakeObject(const std::string& _class_name) const {
     auto itr = m_ctors.find(_class_name);
     if (itr == m_ctors.end()) {
         return nullptr;
@@ -84,6 +84,6 @@ std::shared_ptr<T> abstract_factory<T>::make_object(const std::string& _class_na
 
 } // end namespace alexei_prog_snob
 
-#define REG(Factory, Klass, AbstractKlass) Factory.register_to_factory(#Klass, alexei_prog_snob::Maker<Klass,AbstractKlass> )
+#define REG(Factory, Klass, AbstractKlass) Factory.RegisterToFactory(#Klass, alexei_prog_snob::Maker<Klass,AbstractKlass> )
 
 #endif // FACTORY_H

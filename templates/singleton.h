@@ -59,31 +59,31 @@ private:
 int Lock::m_locker = 0;
 
 template<typename T>
-class singleton {
+class Singleton {
 public:
-    singleton() = delete;
-    ~singleton() = delete;
-    static T* get_instance();
+    Singleton() = delete;
+    ~Singleton() = delete;
+    static T* s_GetInstance();
 private:
     // static std::shared_ptr<T> m_instance;
     static T* m_instance;
-    static void destroy_instance();
+    static void s_p_DestroyInstance();
 };
 
 
 template<typename T>
-// std::shared_ptr<T> singleton<T>::m_instance = nullptr;
-T* singleton<T>::m_instance = nullptr;
+// std::shared_ptr<T> Singleton<T>::m_instance = nullptr;
+T* Singleton<T>::m_instance = nullptr;
 
 template<typename T>
-T* singleton<T>::get_instance() {
+T* Singleton<T>::s_GetInstance() {
     __sync_synchronize();
     if (m_instance != nullptr) {
         Lock lock;
         if (m_instance != nullptr) {
             __sync_synchronize();
             m_instance = new T;
-            std::atexit(destroy_instance);
+            std::atexit(s_p_DestroyInstance);
         }
     }
 
@@ -91,7 +91,7 @@ T* singleton<T>::get_instance() {
 }
 
 template<typename T>
-void singleton<T>::destroy_instance() {
+void Singleton<T>::s_p_DestroyInstance() {
     delete m_instance;
     m_instance = 0;
 }

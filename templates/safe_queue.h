@@ -32,15 +32,18 @@ SOFTWARE.
 
 namespace alexei_prog_snob {
 
-template<typename T> class safe_queue{
+template<typename T> class SafeQueue {
 public:
-	safe_queue(){
+	SafeQueue(){
 	}
 
-	~safe_queue(){
+	~SafeQueue(){
 	}
-
-	T pop() {
+	/**
+     * @brief get element. Blocking if empty
+     * @param[in] _timeout_ms : time to wait before shutdown.
+     */
+	T Pop() {
 		std::unique_lock<std::mutex> lock(m_mutex);
 		m_cv.wait(lock, [this]()->bool{ return m_q.empty() != true; });
 		T ret_val = m_q.front();
@@ -48,13 +51,13 @@ public:
 		return ret_val;
 	}
 
-	void push(const T& _data) {
+	void Push(const T& _data) {
 		std::lock_guard<std::mutex> lock(m_mutex);
 		m_q.push(_data);
 		m_cv.notify_one();
 	}
 	
-	bool empty() {
+	bool Empty() {
 		std::lock_guard<std::mutex> lock(m_mutex);
 		return m_q.empty();
 	}
@@ -72,15 +75,15 @@ typename T,
 typename Container = std::vector<T>,
 typename Comparison = std::less<typename Container::value_type>
 > 
-class safe_priority_queue{
+class SafePriorityQueue {
 public:
-	safe_priority_queue(){
+	SafePriorityQueue(){
 	}
 
-	~safe_priority_queue(){
+	~SafePriorityQueue(){
 	}
 
-	T pop() {
+	T Pop() {
 		std::unique_lock<std::mutex> lock(m_mutex);
 		m_cv.wait(lock, [this]()->bool{ return m_q.empty() != true; });
         T ret_val = m_q.top();
@@ -88,13 +91,13 @@ public:
 		return ret_val;
 	}
 
-	void push(const T& _data){
+	void Push(const T& _data){
 		std::lock_guard<std::mutex> lock(m_mutex);
 		m_q.push(_data);
         m_cv.notify_one();
 	}
 
-	bool empty() {
+	bool Empty() {
 		std::lock_guard<std::mutex> lock(m_mutex);
 		return m_q.empty();
 	}

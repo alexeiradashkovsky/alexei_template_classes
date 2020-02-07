@@ -46,199 +46,199 @@ SOFTWARE.
 namespace alexei_prog_snob {
 
 template<class DataType = std::string>
-class string_cnt_struct {
+class StringCntStruct {
 public:
 	
 	typedef std::function<void(std::shared_ptr<DataType>, const std::string& _str)> Task;
 	typedef std::map<std::string, Task> Dictionary;
 	
-	string_cnt_struct(Dictionary& _dictionary)
-	:m_defaul_names(_dictionary),
+	StringCntStruct(Dictionary& _dictionary)
+	:m_defaultNames(_dictionary),
 	 new_data(nullptr),
-	 m_next_task(nullptr) {
+	 m_nextTask(nullptr) {
 	}
 
-	~string_cnt_struct(){};
+	~StringCntStruct(){};
 
 	std::shared_ptr<DataType> operator()(const std::string& _str) {
-		auto res = m_defaul_names.find(_str);
+		auto res = m_defaultNames.find(_str);
 		std::shared_ptr<DataType> retval(nullptr);
 
-		if( res != m_defaul_names.end()) {
+		if( res != m_defaultNames.end()) {
 			std::shared_ptr<DataType> tmp(new DataType); 
 			new_data = tmp;
-			m_next_task = m_defaul_names[_str];
+			m_nextTask = m_defaultNames[_str];
 		} else {
-			if(m_next_task != nullptr) {
-				m_next_task(new_data, _str);
+			if(m_nextTask != nullptr) {
+				m_nextTask(new_data, _str);
 				retval = new_data;
-				m_next_task = nullptr;
+				m_nextTask = nullptr;
 			}
 		}
 		return retval;
 	}
 
-	std::shared_ptr<DataType> get_last() {
+	std::shared_ptr<DataType> GetLast() {
 		return nullptr;
 	}
 private:
-	Dictionary& m_defaul_names;
+	Dictionary& m_defaultNames;
 	std::shared_ptr<DataType> new_data;
-	Task m_next_task;
+	Task m_nextTask;
 };
 
 
 template<class DataType>
-class data_cnt_struct {
+class DataCntStruct {
 public:
 	typedef std::function<void(std::shared_ptr<DataType>, const std::string& _str)> Task;
 	typedef std::map<std::string, Task> Dictionary;
 	
-	data_cnt_struct(Dictionary& _dictionary)
-	:m_defaul_names(_dictionary),
+	DataCntStruct(Dictionary& _dictionary)
+	:m_defaultNames(_dictionary),
 	 new_data(nullptr),
-	 m_next_task(nullptr) {
+	 m_nextTask(nullptr) {
 	}
 
-	~data_cnt_struct(){};
+	~DataCntStruct(){};
 
 	std::shared_ptr<DataType> operator()(const std::string& _str) {
-		auto res = m_defaul_names.find(_str);
+		auto res = m_defaultNames.find(_str);
 		std::shared_ptr<DataType> retval(nullptr);
-		if(res != m_defaul_names.end()) {
-			m_next_task = m_defaul_names[_str];
+		if(res != m_defaultNames.end()) {
+			m_nextTask = m_defaultNames[_str];
 		} else {
 			if(_str[0] == '[') {
 				std::shared_ptr<DataType> tmp(new DataType);
 				retval = new_data;
 				new_data = tmp;
-				m_defaul_names["name"](new_data, _str);
-				m_next_task == nullptr;
+				m_defaultNames["name"](new_data, _str);
+				m_nextTask == nullptr;
 			}
-			if(m_next_task != nullptr) {
-				m_next_task(new_data, _str);
-				m_next_task = nullptr;
+			if(m_nextTask != nullptr) {
+				m_nextTask(new_data, _str);
+				m_nextTask = nullptr;
 			}
 		}
 		return retval;
 	}
 	
-	std::shared_ptr<DataType> get_last() {
+	std::shared_ptr<DataType> GetLast() {
 		return new_data;
 	}
 private:
-	Dictionary& m_defaul_names;
+	Dictionary& m_defaultNames;
 	std::shared_ptr<DataType> new_data;
-	Task m_next_task;
+	Task m_nextTask;
 };
 
 
 template<class StringContainer = std::queue<std::string> >
-class init_file_parser_template {
+class InitFileParser {
 public:
-	explicit init_file_parser_template(const std::string& _delimiters);
-	~init_file_parser_template();
-	void parse_line(std::string _line, StringContainer& _cnt);
+	explicit InitFileParser(const std::string& _delimiters);
+	~InitFileParser();
+	void ParseLine(std::string _line, StringContainer& _cnt);
 private:
-	std::string m_data_delimiters;
+	std::string m_dataDelimiters;
 };
 
 template<
 class DataType 	= std::string, 
-class Creator 	= string_cnt_struct<DataType>
+class Creator 	= StringCntStruct<DataType>
 >
-class config_file_reader_template {
+class ConfigFileReader {
 public:
 	typedef std::vector<std::string> StringContainer;
 	
-	config_file_reader_template(const std::string& _delimiters, Creator& _creator);
-	~config_file_reader_template();
-	bool read_init_file(const std::string& _file_name);
-	void construct_all_data();
-	bool get_new_data(std::shared_ptr<DataType>& _new_data);
+	ConfigFileReader(const std::string& _delimiters, Creator& _creator);
+	~ConfigFileReader();
+	bool ReadInitFile(const std::string& _fileName);
+	void ConstructAllData();
+	bool GetNewData(std::shared_ptr<DataType>& _newData);
 private:
-	std::queue<std::shared_ptr<DataType> > m_data_cnt;
-	StringContainer m_str_cnt;
-	init_file_parser_template<StringContainer> m_parser;
+	std::queue<std::shared_ptr<DataType> > m_dataCnt;
+	StringContainer m_strCnt;
+	InitFileParser<StringContainer> m_parser;
 	Creator& m_creator;
 };
 
 template<class DataType, class Creator>
-config_file_reader_template<DataType, Creator>::
-config_file_reader_template(const std::string& _delimiters, Creator& _creator)
+ConfigFileReader<DataType, Creator>::
+ConfigFileReader(const std::string& _delimiters, Creator& _creator)
 :m_parser(_delimiters),
  m_creator(_creator) {
 }
 
 template<class DataType, class Creator>
-config_file_reader_template<DataType, Creator>::
-~config_file_reader_template() {
+ConfigFileReader<DataType, Creator>::
+~ConfigFileReader() {
 }
 
 template<class DataType, class Creator>
-bool config_file_reader_template<DataType, Creator>::
-read_init_file(const std::string& _file_name) {
-	std::ifstream init_file(_file_name);
+bool ConfigFileReader<DataType, Creator>::
+ReadInitFile(const std::string& _fileName) {
+	std::ifstream init_file(_fileName);
 	if(init_file.is_open() == false) {
 		return false;
 	}
 
 	std::string get_line;
 	while(std::getline(init_file, get_line)){
-		m_parser.parse_line(get_line, m_str_cnt);
+		m_parser.ParseLine(get_line, m_strCnt);
 	}
 	init_file.close();
 	return true;
 }
 
 template<class DataType, class Creator>
-void config_file_reader_template<DataType, Creator>::
-construct_all_data() {
+void ConfigFileReader<DataType, Creator>::
+ConstructAllData() {
 	auto close_dll = [this](const std::string& _str) { 
 			std::shared_ptr<DataType> new_data(m_creator(_str));
 			if(new_data != nullptr) {
-				m_data_cnt.push(new_data);
+				m_dataCnt.Push(new_data);
 			} 
 		};
 
-	std::for_each(m_str_cnt.begin(), m_str_cnt.end(), close_dll);
+	std::for_each(m_strCnt.begin(), m_strCnt.end(), close_dll);
 
-	std::shared_ptr<DataType> new_data(m_creator.get_last());
+	std::shared_ptr<DataType> new_data(m_creator.GetLast());
 	if(new_data != nullptr) {
-		m_data_cnt.push(new_data);
+		m_dataCnt.Push(new_data);
 	}
 }
 
 template<class DataType, class Creator>
-bool config_file_reader_template<DataType, Creator>::
-get_new_data(std::shared_ptr<DataType>& _new_data) {
-	if(m_data_cnt.empty() == true) {
+bool ConfigFileReader<DataType, Creator>::
+GetNewData(std::shared_ptr<DataType>& _newData) {
+	if(m_dataCnt.Empty() == true) {
 		return true;
 	}
 
-	_new_data = m_data_cnt.front();
-	m_data_cnt.pop();
+	_newData = m_dataCnt.front();
+	m_dataCnt.Pop();
 	return false;	
 }
 
 template<class StringContainer>
-init_file_parser_template<StringContainer>::init_file_parser_template(const std::string& _delimiters)
-:m_data_delimiters(_delimiters) {
+InitFileParser<StringContainer>::InitFileParser(const std::string& _delimiters)
+:m_dataDelimiters(_delimiters) {
 }
 
 template<class StringContainer>
-init_file_parser_template<StringContainer>::~init_file_parser_template(){}
+InitFileParser<StringContainer>::~InitFileParser(){}
 
 template<class StringContainer>
-void init_file_parser_template<StringContainer>::parse_line(std::string _line, StringContainer& _cnt) {
+void InitFileParser<StringContainer>::ParseLine(std::string _line, StringContainer& _cnt) {
 	size_t pos = 0;
 	while(true) {
-		pos = _line.find(m_data_delimiters);
+		pos = _line.find(m_dataDelimiters);
 		std::fill_n(std::back_inserter(_cnt), 1, _line.substr(0,pos));
 		if(pos == std::string::npos) {
 			break;
 		}
-		_line.erase(0, pos + m_data_delimiters.length());
+		_line.erase(0, pos + m_dataDelimiters.length());
 	}
 }
 
