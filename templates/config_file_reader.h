@@ -54,7 +54,7 @@ public:
 	
 	StringCntStruct(Dictionary& _dictionary)
 	:m_defaultNames(_dictionary),
-	 new_data(nullptr),
+	 m_newData(nullptr),
 	 m_nextTask(nullptr) {
 	}
 
@@ -64,14 +64,14 @@ public:
 		auto res = m_defaultNames.find(_str);
 		std::shared_ptr<DataType> retval(nullptr);
 
-		if( res != m_defaultNames.end()) {
+		if (res != m_defaultNames.end()) {
 			std::shared_ptr<DataType> tmp(new DataType); 
-			new_data = tmp;
+			m_newData = tmp;
 			m_nextTask = m_defaultNames[_str];
 		} else {
-			if(m_nextTask != nullptr) {
-				m_nextTask(new_data, _str);
-				retval = new_data;
+			if (m_nextTask != nullptr) {
+				m_nextTask(m_newData, _str);
+				retval = m_newData;
 				m_nextTask = nullptr;
 			}
 		}
@@ -83,7 +83,7 @@ public:
 	}
 private:
 	Dictionary& m_defaultNames;
-	std::shared_ptr<DataType> new_data;
+	std::shared_ptr<DataType> m_newData;
 	Task m_nextTask;
 };
 
@@ -96,7 +96,7 @@ public:
 	
 	DataCntStruct(Dictionary& _dictionary)
 	:m_defaultNames(_dictionary),
-	 new_data(nullptr),
+	 m_newData(nullptr),
 	 m_nextTask(nullptr) {
 	}
 
@@ -105,18 +105,18 @@ public:
 	std::shared_ptr<DataType> operator()(const std::string& _str) {
 		auto res = m_defaultNames.find(_str);
 		std::shared_ptr<DataType> retval(nullptr);
-		if(res != m_defaultNames.end()) {
+		if (res != m_defaultNames.end()) {
 			m_nextTask = m_defaultNames[_str];
 		} else {
-			if(_str[0] == '[') {
+			if (_str[0] == '[') {
 				std::shared_ptr<DataType> tmp(new DataType);
-				retval = new_data;
-				new_data = tmp;
-				m_defaultNames["name"](new_data, _str);
+				retval = m_newData;
+				m_newData = tmp;
+				m_defaultNames["name"](m_newData, _str);
 				m_nextTask == nullptr;
 			}
-			if(m_nextTask != nullptr) {
-				m_nextTask(new_data, _str);
+			if (m_nextTask != nullptr) {
+				m_nextTask(m_newData, _str);
 				m_nextTask = nullptr;
 			}
 		}
@@ -124,11 +124,11 @@ public:
 	}
 	
 	std::shared_ptr<DataType> GetLast() {
-		return new_data;
+		return m_newData;
 	}
 private:
 	Dictionary& m_defaultNames;
-	std::shared_ptr<DataType> new_data;
+	std::shared_ptr<DataType> m_newData;
 	Task m_nextTask;
 };
 
@@ -178,16 +178,16 @@ ConfigFileReader<DataType, Creator>::
 template<class DataType, class Creator>
 bool ConfigFileReader<DataType, Creator>::
 ReadInitFile(const std::string& _fileName) {
-	std::ifstream init_file(_fileName);
-	if(init_file.is_open() == false) {
+	std::ifstream initFile(_fileName);
+	if (initFile.is_open() == false) {
 		return false;
 	}
 
-	std::string get_line;
-	while(std::getline(init_file, get_line)){
-		m_parser.ParseLine(get_line, m_strCnt);
+	std::string getLine;
+	while(std::getline(initFile, getLine)){
+		m_parser.ParseLine(getLine, m_strCnt);
 	}
-	init_file.close();
+	initFile.close();
 	return true;
 }
 
@@ -195,24 +195,24 @@ template<class DataType, class Creator>
 void ConfigFileReader<DataType, Creator>::
 ConstructAllData() {
 	auto close_dll = [this](const std::string& _str) { 
-			std::shared_ptr<DataType> new_data(m_creator(_str));
-			if(new_data != nullptr) {
-				m_dataCnt.Push(new_data);
+			std::shared_ptr<DataType> newData(m_creator(_str));
+			if (newData != nullptr) {
+				m_dataCnt.Push(newData);
 			} 
 		};
 
 	std::for_each(m_strCnt.begin(), m_strCnt.end(), close_dll);
 
-	std::shared_ptr<DataType> new_data(m_creator.GetLast());
-	if(new_data != nullptr) {
-		m_dataCnt.Push(new_data);
+	std::shared_ptr<DataType> newData(m_creator.GetLast());
+	if (newData != nullptr) {
+		m_dataCnt.Push(newData);
 	}
 }
 
 template<class DataType, class Creator>
 bool ConfigFileReader<DataType, Creator>::
 GetNewData(std::shared_ptr<DataType>& _newData) {
-	if(m_dataCnt.Empty() == true) {
+	if (m_dataCnt.Empty() == true) {
 		return true;
 	}
 
@@ -235,7 +235,7 @@ void InitFileParser<StringContainer>::ParseLine(std::string _line, StringContain
 	while(true) {
 		pos = _line.find(m_dataDelimiters);
 		std::fill_n(std::back_inserter(_cnt), 1, _line.substr(0,pos));
-		if(pos == std::string::npos) {
+		if (pos == std::string::npos) {
 			break;
 		}
 		_line.erase(0, pos + m_dataDelimiters.length());
