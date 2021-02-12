@@ -54,8 +54,8 @@ public:
     AbstractFactory(){}
     ~AbstractFactory(){}
 
-    void RegisterToFactory(const std::string& _class_name, MakeMethod _method);
-    std::shared_ptr<T> MakeObject(const std::string& _class_name) const;
+    void RegisterToFactory(const std::string& _className, MakeMethod _method);
+    std::shared_ptr<T> MakeObject(const std::string& _className) const;
 private:
     std::map<std::string, MakeMethod> m_ctors;
 };
@@ -67,14 +67,14 @@ std::shared_ptr<abstract_class> Maker() {
 }
 
 template<typename T>
-void AbstractFactory<T>::RegisterToFactory(const std::string& _class_name, MakeMethod _method) {
-    m_ctors[_class_name] = _method;
+void AbstractFactory<T>::RegisterToFactory(const std::string& _className, MakeMethod _method) {
+    m_ctors[_className] = _method;
 }
 
 
 template<typename T>
-std::shared_ptr<T> AbstractFactory<T>::MakeObject(const std::string& _class_name) const {
-    auto itr = m_ctors.find(_class_name);
+std::shared_ptr<T> AbstractFactory<T>::MakeObject(const std::string& _className) const {
+    auto itr = m_ctors.find(_className);
     if (itr == m_ctors.end()) {
         return nullptr;
     }
