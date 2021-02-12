@@ -50,96 +50,96 @@ SOFTWARE.
 
 namespace alexei_prog_snob {
     
-template<class T> class dll_loader_template {
+template<class T> class DllLaderTemplate {
 public:
     typedef T* creat_t();
 
      /**
-     * @brief dll_loader_template constructor
+     * @brief DllLaderTemplate constructor
      * @param[in] _path             : path to all dll files.
-     * @param[in] _create_function  : name of the create functions
-     * @param[in] _dll_ending       : type of the ending of dll files (by operating system).
+     * @param[in] _createFunction  : name of the create functions
+     * @param[in] _dllEnding       : type of the ending of dll files (by operating system).
      */
-    dll_loader_template(const std::string& _path, const std::string& _create_function, const std::string& _dll_ending);
+    DllLaderTemplate(const std::string& _path, const std::string& _createFunction, const std::string& _dllEnding);
     
-    ~dll_loader_template();
+    ~DllLaderTemplate();
 
     /**
-     * @brief load_all_dlls load all dll files
-     * @param[in] _all_dll : all dll files names
+     * @brief LoadAllDlls load all dll files
+     * @param[in] _allDll : all dll files names
      */
-    void load_all_dlls(const std::vector<std::string>& _all_dll);
+    void LoadAllDlls(const std::vector<std::string>& _allDll);
 
     /**
-     * @brief load_dll_object load an abstract class by the constructor that you implemented in dll file
-     * @param[in] _dll_name : dll file name
+     * @brief LoadDllObject load an abstract class by the constructor that you implemented in dll file
+     * @param[in] _dllName : dll file name
      * @return - the abstract class for polymorphism 
      */
-    std::shared_ptr<T> load_dll_object(const std::string& _dll_name);
+    std::shared_ptr<T> LoadDllObject(const std::string& _dllName);
 private:
-    void* load_new_dll(const std::string& _dll_name);
+    void* p_LoadNewDll(const std::string& _dllName);
 
     std::string m_path;
     std::string m_create;
-    std::string m_dll_ending;
-    std::map<std::string, void*> m_dll_libs;
+    std::string m_dllEnding;
+    std::map<std::string, void*> m_dllLibs;
 
     // uncopyable
-    dll_loader_template(const dll_loader_template&);
-    dll_loader_template operator=(const dll_loader_template&);
+    DllLaderTemplate(const DllLaderTemplate&);
+    DllLaderTemplate operator=(const DllLaderTemplate&);
 };
 
 template<class T>
-dll_loader_template<T>::dll_loader_template(
+DllLaderTemplate<T>::DllLaderTemplate(
     const std::string& _path, 
-    const std::string& _create_function, 
-    const std::string& _dll_ending)
+    const std::string& _createFunction, 
+    const std::string& _dllEnding)
 :m_path(_path),
- m_create(_create_function),
- m_dll_ending(_dll_ending) {
+ m_create(_createFunction),
+ m_dllEnding(_dllEnding) {
 }
 
 
 template<class T>
-dll_loader_template<T>::~dll_loader_template() {
-    auto close_dll = [](std::pair<const std::string, void*>& _dll_lib) { dlclose(_dll_lib.second); };
-    std::for_each(m_dll_libs.begin(), m_dll_libs.end(), close_dll);
+DllLaderTemplate<T>::~DllLaderTemplate() {
+    auto closeDll = [](std::pair<const std::string, void*>& _dllLib) { dlclose(_dllLib.second); };
+    std::for_each(m_dllLibs.begin(), m_dllLibs.end(), closeDll);
 }
 
 template<class T>
-void dll_loader_template<T>::load_all_dlls(const std::vector<std::string>& _all_dll) {
-    std::for_each(_all_dll.begin(), _all_dll.end() , [](const std::string& _dll_name){ load_new_dll(_dll_name); });
+void DllLaderTemplate<T>::LoadAllDlls(const std::vector<std::string>& _allDll) {
+    std::for_each(_allDll.begin(), _allDll.end() , [](const std::string& _dllName){ p_LoadNewDll(_dllName); });
 }
 
 template<class T>
-void* dll_loader_template<T>::load_new_dll(const std::string& _dll_name) {
-    std::string full_path = m_path + _dll_name + m_dll_ending;
-    void* newlib = dlopen(full_path.c_str(), RTLD_LAZY);
-    if (newlib == nullptr) {
-        std::string dll_error(dlerror());
+void* DllLaderTemplate<T>::p_LoadNewDll(const std::string& _dllName) {
+    std::string fullPath = m_path + _dllName + m_dllEnding;
+    void* newLib = dlopen(fullPath.c_str(), RTLD_LAZY);
+    if (newLib == nullptr) {
+        std::string dllError(dlerror());
         return nullptr;
     }
 
-    m_dll_libs[_dll_name] = newlib;
-    return newlib;
+    m_dllLibs[_dllName] = newLib;
+    return newLib;
 }
 
 template<class T>
-std::shared_ptr<T> dll_loader_template<T>::load_dll_object(const std::string& _dll_name) {
+std::shared_ptr<T> DllLaderTemplate<T>::LoadDllObject(const std::string& _dllName) {
     void* correntLib = nullptr;
-    std::map<std::string, void*>::iterator itr = m_dll_libs.find(_dll_name);
+    std::map<std::string, void*>::iterator itr = m_dllLibs.find(_dllName);
 
-	correntLib = (itr == m_dll_libs.end()) ? load_new_dll(_dll_name):itr->second;
-    if(correntLib == nullptr) {
+	correntLib = (itr == m_dllLibs.end()) ? p_LoadNewDll(_dllName) : itr->second;
+    if (correntLib == nullptr) {
         return nullptr;
     }
     
-    creat_t* create_object = (creat_t*) dlsym(correntLib, m_create.c_str());
-    if(create_object == nullptr) {
+    creat_t* createObject = (creat_t*) dlsym(correntLib, m_create.c_str());
+    if (createObject == nullptr) {
         return nullptr;
     }
-    std::shared_ptr<T> new_ptr(create_object());
-    return new_ptr;
+    std::shared_ptr<T> newPtr(createObject());
+    return newPtr;
 }
 
 } // end namespace alexei_prog_snob
