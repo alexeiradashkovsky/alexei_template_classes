@@ -35,7 +35,7 @@ typedef struct TEST_PAIR{
 #define END_UNIT               return PASS; \
                             }
 
-#define ASSERT_THAT(e)      do{ if(!(e)) return FAIL;} while(0)
+#define ASSERT_THAT(e)      do{ if (!(e)) return FAIL;} while(0)
 
 #define TEST_SUITE(name)    int main(){\
                                 const char *test_name = #name; \

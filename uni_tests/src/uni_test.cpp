@@ -38,12 +38,12 @@ END_UNIT
 // END_UNIT
 
 // UNIT(basic_flow_call_func_from_python)
-// 	ASSERT_THAT(call_function_withou_params_and_without_return_value() == PYTHON_TEST_PASS);
+// 	ASSERT_THAT(CallFunction_withou_params_and_without_return_value() == PYTHON_TEST_PASS);
 // END_UNIT
 
 
 // UNIT(get_return_value_from_python_function)
-// 	ASSERT_THAT(call_function_without_params_and_with_return_value() == PYTHON_TEST_PASS);
+// 	ASSERT_THAT(CallFunction_without_params_and_with_return_value() == PYTHON_TEST_PASS);
 // END_UNIT
 
 UNIT(cdp_abstract_factory_create_object)

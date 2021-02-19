@@ -66,7 +66,7 @@ thread_pool_result submit_priority_taks() {
 
     std::array<uint8_t,3> arr_result = {3,2,1};
     for(size_t i = 0 ; i < 3 ; ++i) {
-        if(arr_result[i] != arr[i]) {
+        if (arr_result[i] != arr[i]) {
             return THREAD_FAIL;
         }
     }

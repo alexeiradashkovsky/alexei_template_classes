@@ -41,7 +41,7 @@ public:
 	}
 	/**
      * @brief get element. Blocking if empty
-     * @param[in] _timeout_ms : time to wait before shutdown.
+     * @param[in] _msTimeout : time to wait before shutdown.
      */
 	T Pop() {
 		std::unique_lock<std::mutex> lock(m_mutex);
